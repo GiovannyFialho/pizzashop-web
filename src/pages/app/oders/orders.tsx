@@ -5,9 +5,10 @@ import {
   TableHeader,
 } from "@/components/ui/table";
 
+import { Pagination } from "@/components/pagination";
+
 import { OrderTableFilters } from "@/pages/app/oders/order-table-filters";
 import { OrderTableRow } from "@/pages/app/oders/order-table-row";
-import { Pagination } from "../../../components/pagination";
 
 export function Orders() {
   return (
