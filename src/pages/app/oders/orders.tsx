@@ -1,3 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
+
+import { getOrders } from "@/api/get-orders";
+
 import {
   Table,
   TableBody,
@@ -11,6 +15,11 @@ import { OrderTableFilters } from "@/pages/app/oders/order-table-filters";
 import { OrderTableRow } from "@/pages/app/oders/order-table-row";
 
 export function Orders() {
+  const { data: result } = useQuery({
+    queryKey: ["orders"],
+    queryFn: getOrders,
+  });
+
   return (
     <>
       <div className="flex flex-col gap-4">
@@ -33,9 +42,10 @@ export function Orders() {
               </TableHeader>
 
               <TableBody>
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <OrderTableRow key={i} />
-                ))}
+                {result &&
+                  result.orders.map((order) => (
+                    <OrderTableRow key={order.orderId} order={order} />
+                  ))}
               </TableBody>
             </Table>
           </div>
