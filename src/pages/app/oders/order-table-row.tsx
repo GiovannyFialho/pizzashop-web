@@ -1,7 +1,11 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ArrowRight, Search, X } from "lucide-react";
 import { useState } from "react";
+
+import { cancelOrder } from "@/api/cancel-order";
+import type { GetOrdersResponse } from "@/api/get-orders";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
@@ -9,6 +13,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 
 import { OrderDetails } from "@/pages/app/oders/order-details";
 import { OrderStatus } from "@/pages/app/oders/order-status";
+import { toast } from "sonner";
 
 interface OrderTableRowProps {
   order: {
@@ -22,6 +27,41 @@ interface OrderTableRowProps {
 
 export function OrderTableRow({ order }: OrderTableRowProps) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: cancelOrderFn, isPending: isCanceling } = useMutation({
+    mutationFn: cancelOrder,
+    async onSuccess(_, { orderId }) {
+      const ordersListCached = queryClient.getQueriesData<GetOrdersResponse>({
+        queryKey: ["orders"],
+      });
+
+      ordersListCached.forEach(([cachedKey, cachedData]) => {
+        if (!cachedData) {
+          return;
+        }
+
+        queryClient.setQueryData<GetOrdersResponse>(cachedKey, {
+          ...cachedData,
+          orders: cachedData.orders.map((order) => {
+            if (order.orderId === orderId) {
+              return { ...order, status: "canceled" };
+            }
+
+            return order;
+          }),
+        });
+      });
+
+      toast.success("Pedido cancelado com sucesso!");
+    },
+    onError: () => {
+      toast.error(
+        "Ops! Houver um erro ao tentar cancelar o pedido, tente novamente mais tarde.",
+      );
+    },
+  });
 
   return (
     <TableRow>
@@ -70,7 +110,14 @@ export function OrderTableRow({ order }: OrderTableRowProps) {
       </TableCell>
 
       <TableCell>
-        <Button variant="ghost" size="xs">
+        <Button
+          variant="ghost"
+          size="xs"
+          disabled={
+            !["pending", "processing"].includes(order.status) || isCanceling
+          }
+          onClick={() => cancelOrderFn({ orderId: order.orderId })}
+        >
           <X className="mr-2 h-2 w-2" />
           Cancelar
         </Button>
