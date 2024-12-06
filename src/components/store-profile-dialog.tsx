@@ -25,7 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 const storeProfileSchema = z.object({
   name: z.string().min(1, "Campo obrigatório"),
-  description: z.string(),
+  description: z.string().nullable(),
 });
 
 type StoreProfileSchema = z.infer<typeof storeProfileSchema>;
@@ -53,23 +53,39 @@ export function StoreProfileDialog() {
 
   const { mutateAsync: updateProfileFn } = useMutation({
     mutationFn: updateProfile,
-    onSuccess(_, { name, description }) {
-      const cached = queryClient.getQueryData<GetManagedRestaurantResponse>([
-        "manager-resturant",
-      ]);
+    onMutate({ name, description }) {
+      const { cached } = updateManagerRestaurantCache({ name, description });
 
-      if (cached) {
-        queryClient.setQueryData<GetManagedRestaurantResponse>(
-          ["manager-resturant"],
-          {
-            ...cached,
-            name,
-            description,
-          },
-        );
+      return { previousProfile: cached };
+    },
+    onError(_, __, context) {
+      if (context?.previousProfile) {
+        updateManagerRestaurantCache(context.previousProfile);
       }
     },
   });
+
+  function updateManagerRestaurantCache({
+    name,
+    description,
+  }: StoreProfileSchema) {
+    const cached = queryClient.getQueryData<GetManagedRestaurantResponse>([
+      "manager-resturant",
+    ]);
+
+    if (cached) {
+      queryClient.setQueryData<GetManagedRestaurantResponse>(
+        ["manager-resturant"],
+        {
+          ...cached,
+          name,
+          description,
+        },
+      );
+    }
+
+    return { cached };
+  }
 
   async function handleUpdateProfile(data: StoreProfileSchema) {
     try {
