@@ -5,6 +5,8 @@ import { getMonthOrdersAmount } from "@/api/get-month-orders-amount";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+import { MetricCardSkeleton } from "@/pages/app/dashboard/metric-card-skeleton";
+
 export function MonthOrdersAmountCard() {
   const { data: monthOrdersAmount } = useQuery({
     queryKey: ["metrics", "month-orders-amount"],
@@ -20,7 +22,7 @@ export function MonthOrdersAmountCard() {
       </CardHeader>
 
       <CardContent className="space-y-1">
-        {monthOrdersAmount && (
+        {monthOrdersAmount ? (
           <>
             <span className="text-2xl font-bold tracking-tight">
               {monthOrdersAmount.amount.toLocaleString("pt-BR")}
@@ -43,6 +45,8 @@ export function MonthOrdersAmountCard() {
               )}
             </p>
           </>
+        ) : (
+          <MetricCardSkeleton />
         )}
       </CardContent>
     </Card>

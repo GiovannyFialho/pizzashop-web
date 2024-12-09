@@ -5,6 +5,8 @@ import { getMonthCanceledOrdersAmount } from "@/api/get-month-canceled-orders-am
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+import { MetricCardSkeleton } from "@/pages/app/dashboard/metric-card-skeleton";
+
 export function MonthCanceledOrdersAmountCard() {
   const { data: monthCanceledOrdersAmount } = useQuery({
     queryKey: ["metrics", "month-canceled-orders-amount"],
@@ -22,7 +24,7 @@ export function MonthCanceledOrdersAmountCard() {
       </CardHeader>
 
       <CardContent className="space-y-1">
-        {monthCanceledOrdersAmount && (
+        {monthCanceledOrdersAmount ? (
           <>
             <span className="text-2xl font-bold tracking-tight">
               {monthCanceledOrdersAmount.amount.toLocaleString("pt-BR")}
@@ -45,6 +47,8 @@ export function MonthCanceledOrdersAmountCard() {
               )}
             </p>
           </>
+        ) : (
+          <MetricCardSkeleton />
         )}
       </CardContent>
     </Card>
