@@ -1,12 +1,12 @@
 import { http, HttpResponse } from "msw";
 
 import {
-  GetOrderDetailsBody,
+  GetOrderDetailsParams,
   GetOrderDetailsResponse,
 } from "@/api/get-order-details";
 
 export const getOrderDetailsMock = http.get<
-  GetOrderDetailsBody,
+  GetOrderDetailsParams,
   never,
   GetOrderDetailsResponse
 >("/orders/:orderId", ({ params }) => {
