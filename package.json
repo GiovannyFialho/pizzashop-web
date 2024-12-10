@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:test": "vite --port 50789 --mode test",
+    "dev:playwright": "npx playwright test --ui",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest"
